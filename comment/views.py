@@ -13,6 +13,9 @@ class CommentView(View):
                 comment = data['comment']
         ).save()
         return HttpResponse(status=200)
+    def get(self, request):
+        comment = Comment.objects.values()
+        return JsonResponse({'comments':list(comment)}, status=200)
 
 class CommentfilterView(View):
     def get(self, request):
