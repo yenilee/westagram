@@ -8,29 +8,27 @@ from .models import Comment
 class CommentView(View):
     def post(self, request):
         data = json.loads(request.body)
-        Comment(
-                user = data['user'],
-                comment = data['comment']
-        ).save()
-        return HttpResponse(status=200)
+        try:
+            Comment(
+                  user = data['user'],
+                  comment = data['comment']
+            ).save()
+            return HttpResponse(status=200)
+        except KeyError:
+            return JsonResponse({'message': 'INVALID_KEY'}, status=401)
     def get(self, request):
         comment = Comment.objects.values()
         return JsonResponse({'comments':list(comment)}, status=200)
 
 class CommentfilterView(View):
-    def get(self, request):
+    def post(self, request):
         data = json.loads(request.body)
         comment_user = data.get('user', None)
-        try:
-            if Comment.objects.filter(user=comment_id):
-               user_data = Comment.objects.filter(user=comment_id)
-               user_data_length = len(user_data)
-               my_list={}
-               for num in range(user_data_length):
-                   my_list[num] = user_data[num].comment
-            return JsonResponse({'comment_list':my_list}, status=200)
 
-        except TypeError:
-            return JsonResponse({'message': 'INVALID_USER'}, status = 401)
+        if Comment.objects.filter(user=comment_user):
+            user_comment_list = Comment.objects.filter(user=comment_user).values('comment')
+            return JsonResponse({'user_comment_list':list(user_comment_list)}, status=200)
+        return JsonResponse({'message':"INVALID_KEY"}, status=400)
+
 
 
